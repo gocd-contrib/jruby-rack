@@ -16,6 +16,10 @@ updates:
     open-pull-requests-limit: 99
     groups:
       maven-deps:
+        dependency-type: "production"
+        patterns: [ "*" ]
+      maven-dev-deps:
+        dependency-type: "development"
         patterns: [ "*" ]
   - package-ecosystem: bundler
     directories:
