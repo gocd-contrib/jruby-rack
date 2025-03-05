@@ -17,10 +17,8 @@ updates:
     groups:
       maven-deps:
         dependency-type: "production"
-        patterns: [ "*" ]
       maven-dev-deps:
         dependency-type: "development"
-        patterns: [ "*" ]
   - package-ecosystem: bundler
     directories:
       - "/"
