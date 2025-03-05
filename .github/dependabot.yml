@@ -38,5 +38,5 @@ updates:
       - dependency-type: all
     groups:
       appraisal-deps:
-        update-types: patch
+        update-types: [ "patch" ]
         patterns: [ "*" ]
