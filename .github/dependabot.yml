@@ -6,8 +6,8 @@ updates:
       interval: weekly
       day: friday
     groups:
-      - actions-deps:
-          patterns: [ "*" ]
+      actions-deps:
+        patterns: [ "*" ]
   - package-ecosystem: maven
     directory: "/"
     schedule:
@@ -15,8 +15,8 @@ updates:
       day: friday
     open-pull-requests-limit: 99
     groups:
-      - maven-deps:
-          patterns: [ "*" ]
+      maven-deps:
+        patterns: [ "*" ]
   - package-ecosystem: bundler
     directories:
       - "/"
@@ -26,8 +26,8 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      - ruby-deps:
-          patterns: [ "*" ]
+      ruby-deps:
+        patterns: [ "*" ]
   - package-ecosystem: bundler
     directories:
       - "gemfiles/"
@@ -37,6 +37,6 @@ updates:
     allow:
       - dependency-type: all
     groups:
-      - appraisal-deps:
-          update-types: patch
-          patterns: [ "*" ]
+      appraisal-deps:
+        update-types: patch
+        patterns: [ "*" ]
