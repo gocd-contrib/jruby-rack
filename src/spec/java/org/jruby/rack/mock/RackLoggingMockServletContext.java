@@ -17,7 +17,6 @@
 package org.jruby.rack.mock;
 
 import org.jruby.rack.RackLogger;
-import org.springframework.core.io.ResourceLoader;
 
 public class RackLoggingMockServletContext extends org.springframework.mock.web.MockServletContext {
     private RackLogger logger = new NullLogger();
