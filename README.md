@@ -13,6 +13,23 @@ current stable 1.1.x releases.**
 [![Gem Version](https://badge.fury.io/rb/jruby-rack.png)][8]
 [![Build Status](https://github.com/jruby/jruby-rack/actions/workflows/maven.yml/badge.svg)][9]
 
+## gocd-contrib Fork
+
+This fork is intended as temporary to validate jruby-rack changes with quicker turnaround time. The goal is to
+merge changes upstream, and avoid use of this fork. You are not recommended to create dependencies on it.
+
+If necessary, it is available through [https://jitpack.io](https://jitpack.io).
+
+```groovy
+repositories {
+  maven { url = 'https://jitpack.io' }
+}
+
+dependencies {
+  implementation 'com.github.gocd-contrib:jruby-rack:1.2.3.6'
+}
+```
+
 ## Compatibility
 
 JRuby-Rack 1.2.x
