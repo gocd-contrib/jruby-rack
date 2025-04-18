@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.github.gocd-contrib:jruby-rack:1.2.3.6'
+  implementation 'com.github.gocd-contrib:jruby-rack:1.2.3.9'
 }
 ```
 
