@@ -103,5 +103,6 @@ jobs:
       - name: Run appraisal for ${{ matrix.appraisal }}
         env:
           BUNDLE_GEMFILE: gemfiles/${{ matrix.appraisal }}.gemfile
+          JRUBY_VERSION: ${{ matrix.jruby_version }}
         run: bundle install && bundle exec rake spec
 
