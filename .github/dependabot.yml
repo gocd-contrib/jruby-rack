@@ -3,17 +3,14 @@ updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
-      day: friday
+      interval: monthly
     groups:
       actions-deps:
         patterns: [ "*" ]
   - package-ecosystem: maven
     directory: "/"
     schedule:
-      interval: weekly
-      day: friday
-    open-pull-requests-limit: 99
+      interval: monthly
     groups:
       maven-deps:
         dependency-type: "production"
@@ -23,22 +20,9 @@ updates:
     directories:
       - "/"
     schedule:
-      interval: weekly
-      day: friday
+      interval: monthly
     allow:
       - dependency-type: all
     groups:
       ruby-deps:
-        patterns: [ "*" ]
-  - package-ecosystem: bundler
-    directories:
-      - "gemfiles/"
-    schedule:
-      interval: weekly
-      day: friday
-    allow:
-      - dependency-type: all
-    groups:
-      appraisal-deps:
-        update-types: [ "patch" ]
         patterns: [ "*" ]
