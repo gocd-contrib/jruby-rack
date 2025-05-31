@@ -15,8 +15,10 @@ current stable 1.1.x releases.**
 
 ## gocd-contrib Fork
 
-This fork is intended as temporary to validate jruby-rack changes with quicker turnaround time. The goal is to
+This fork was intended as temporary to validate jruby-rack changes for 1.2.x with quicker turnaround time. The goal is to
 merge changes upstream, and avoid use of this fork. You are not recommended to create dependencies on it.
+
+Subsequently jruby-rack **1.2.3** was released which contains most of the changes that were here.
 
 If necessary, it is available through [https://jitpack.io](https://jitpack.io).
 
@@ -29,6 +31,8 @@ dependencies {
   implementation 'com.github.gocd-contrib:jruby-rack:1.2.3.10'
 }
 ```
+
+
 
 ## Compatibility
 
