@@ -142,9 +142,7 @@ module JRuby::Rack
 
         def commit_csrf_token(req, session_hash)
           csrf_token = req.env[::ActionController::RequestForgeryProtection::CSRF_TOKEN] if defined?(::ActionController::RequestForgeryProtection::CSRF_TOKEN)
-          if csrf_token
-            session_hash[:_csrf_token] = csrf_token
-          end
+          session_hash[:_csrf_token] = csrf_token if csrf_token
         end
 
         def write_session(req, session_id, session_hash, _options)
