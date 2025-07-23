@@ -5,6 +5,6 @@ before_install:
   - source "$HOME/.sdkman/bin/sdkman-init.sh"
   - sdk update
   - sdk install maven
-  - sdk install java 21.0.7.6-tem
-  - sdk use java 21.0.7.6-tem
+  - sdk install java 21.0.8.9-tem
+  - sdk use java 21.0.8.9-tem
   - mvn -v
