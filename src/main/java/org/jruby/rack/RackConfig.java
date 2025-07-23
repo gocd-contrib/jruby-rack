@@ -72,8 +72,7 @@ public interface RackConfig {
      * By returning null the environment (JRuby sets up System.getenv) will be
      * kept as is. 
      *
-     * NOTE: This method if not returning null should return a mutable map.
-     *
+     * @apiNote This method if not returning null should return a mutable map.
      * @return the <code>ENV</code> to be used in started Ruby runtimes
      */
     Map<String, String> getRuntimeEnvironment();
@@ -169,26 +168,7 @@ public interface RackConfig {
      */
     @Deprecated
     boolean isFilterVerifiesResource();
-
-    /** 
-     * Return the JNDI name of the JMS connection factory.
-     *
-     * @return the JMS connection factory
-     * @deprecated JMS is rarely used thus should not be here
-     */
-    @Deprecated
-    String getJmsConnectionFactory();
-
-    /** 
-     * Return the JNDI properties for JMS.
-     *
-     * @return  the JNDI properties
-     * @deprecated JMS is rarely used thus should not be here
-     */
-    @Deprecated
-    String getJmsJndiProperties();
-    
-    /** 
+        /**
      * General property retrieval for custom configuration values.
      *
      * @param key the key

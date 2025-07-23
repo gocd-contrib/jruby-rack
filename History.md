@@ -1,10 +1,26 @@
+## 1.3.0 (UNRELEASED) 
+
+- Require Java 11 or later
+- Support Javax Servlet API 4.0 (JEE 8)
+- Adds basic compatibility with JRuby 10.0
+- Drop support for JRuby 9.3
+- Drop unnecessary `jruby.compat.version` and `RackConfig.getCompatVersion()` API
+- Drop JMS support
+- Drop deprecated `RackLogger` string (level) constants
+- Drop `jruby.rack.jruby.version` and `jruby.rack.rack.release` keys from rack `env` Hhsh
+- Change context listener to throw, in case of an exception during initialization, by default
+- Change rails context listener to assume a thread-safe application by default
+- update (bundled) rack to 2.2.17
+- Fix Rails 7.1 CSRF protection when working with `JavaServletStore` sessions
+
 ## 1.2.4 (UNRELEASED)
 
-- update (bundled) rack to 2.2.16
+- update (bundled) rack to 2.2.17
+- Fix Rails 7.1 CSRF protection when working with `JavaServletStore` sessions
 
 ## 1.2.3
 
-- avoid warnings due usage of `File.exists?`
+- avoid warnings due to usage of `File.exists?`
 - Fix Rails 7.1 compatibility by ensuring active_support is required before railtie
 - Workaround logger require issues with concurrent-ruby 1.3.5 and older Rails versions
 - Workaround NameError frozen string literal issues with JRuby 9.3 and Rails 5.2/6.0
