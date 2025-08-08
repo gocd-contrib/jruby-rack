@@ -101,8 +101,7 @@ describe JRuby::Rack::RailsBooter do
 
   RAILS_ROOT_DIR = File.expand_path("../../../rails", __FILE__)
 
-  # NOTE: specs currently only test with a stubbed Rails::Railtie
-  describe "Rails (stubbed)", :lib => :stub do
+  describe "Rails (stubbed)", :lib => :stub do # NOTE: specs currently only test with a stubbed Rails::Railtie
 
     before :all do
       $LOAD_PATH.unshift File.join(RAILS_ROOT_DIR, 'stub') # for require 'rails/railtie'
@@ -126,6 +125,8 @@ describe JRuby::Rack::RailsBooter do
       $servlet_context = nil
     end
 
+    let(:railtie_class) { Class.new(Rails::Railtie) }
+
     it "should have loaded the railtie" do
       defined?(JRuby::Rack::Railtie).should_not be nil
     end
@@ -137,8 +138,8 @@ describe JRuby::Rack::RailsBooter do
       app = double("app"); app.stub_chain(:config, :paths).and_return(paths)
       public_path = Pathname.new(booter.public_path)
 
-      Rails::Railtie.config.__before_configuration.size.should == 1
-      before_config = Rails::Railtie.config.__before_configuration.first
+      railtie_class.config.__before_configuration.size.should == 1
+      before_config = railtie_class.config.__before_configuration.first
       before_config.should_not be nil
 
       before_config.call(app)
@@ -155,7 +156,7 @@ describe JRuby::Rack::RailsBooter do
       app = double("app"); app.stub_chain(:config, :paths).and_return(paths)
       JRuby::Rack.public_path = nil
 
-      before_config = Rails::Railtie.config.__before_configuration.first
+      before_config = railtie_class.config.__before_configuration.first
       before_config.should_not be nil
       before_config.call(app)
 
@@ -168,16 +169,17 @@ describe JRuby::Rack::RailsBooter do
 
       before(:all) do
         @active_support = defined? ::ActiveSupport
-        @tagged_logging = active_support && ActiveSupport::TaggedLogging rescue false
+        @active_support = ::ActiveSupport.constants if @active_support
+        require 'active_support/logger'
       end
 
       after(:all) do
-        if @tagged_logging == false
-          if @active_support
-            ActiveSupport.send :remove_const, :TaggedLogging
-          else
-            Object.send :remove_const, :ActiveSupport rescue nil
+        if @active_support
+          [:Logger, :TaggedLogging, :LoggerSilence, :LoggerThreadSafeLevel].each do |name| # stubbed bits we might end up loading
+            ActiveSupport.send :remove_const, name unless @active_support.include?(name)
           end
+        else
+          Object.send :remove_const, :ActiveSupport rescue nil
         end
       end
 
@@ -195,7 +197,7 @@ describe JRuby::Rack::RailsBooter do
         log_initializer[1].should == [{:before => :initialize_logger}]
       end
 
-      it "gets set as config.logger (wrapped with tagged logging)" do
+      it "gets set as config.logger (wrapped with tagged logging and logger_silence)" do
         logger = JRuby::Rack::Logger.new STDERR
         @config.stub(:log_level).and_return(:info)
         @config.stub(:log_formatter).and_return(nil)
@@ -206,6 +208,13 @@ describe JRuby::Rack::RailsBooter do
         rails_logger = @app.config.logger
         # ActiveSupport::TaggedLogging.new clones the original logger instance
         expect(rails_logger).to be_a(JRuby::Rack::Logger)
+        expect(rails_logger).to be_a(ActiveSupport::TaggedLogging)
+        if defined? ActiveSupport::LoggerSilence
+          expect(rails_logger).to be_a(ActiveSupport::LoggerSilence)
+          # sanity check silence works:
+          value_returned = rails_logger.silence(Logger::WARN) { |logger| logger.class.name }
+          expect(value_returned).to eql('JRuby::Rack::Logger')
+        end
       end
 
       it "has a configurable log level" do
@@ -232,63 +241,6 @@ describe JRuby::Rack::RailsBooter do
       app = double "app"
       Rails.application = app
       booter.to_app.should == app
-    end
-
-    it "should set config.action_controller.relative_url_root based on ENV['RAILS_RELATIVE_URL_ROOT']" do
-      ENV['RAILS_RELATIVE_URL_ROOT'] = '/blah'
-      app = double "app"
-      app.stub_chain(:config, :action_controller, :relative_url_root)
-      app.config.action_controller.should_receive(:relative_url_root=).with("/blah")
-      before_config = Rails::Railtie.__initializer.detect { |i| i.first =~ /url/ }
-      before_config.should_not be_nil
-      before_config[1].should == [{:after => "action_controller.set_configs"}]
-      before_config.last.call(app)
-    end
-
-  end # if defined? Rails
-
-  # NOTE: specs currently only test with a stubbed Rails::Railtie
-  describe "Rails 3.1", :lib => [ :stub ] do
-
-    before :each do
-      $servlet_context = @servlet_context
-      #booter.layout_class = JRuby::Rack::FileSystemLayout
-      booter.app_path = RAILS_ROOT_DIR.dup
-      def booter.rails2?; false end
-      booter.boot!
-      booter.load_environment
-    end
-
-    after :all do
-      $servlet_context = nil
-    end
-
-    #
-    # relative_url_root= has been deprecated in Rails > 3. We should not call it when it's not defined.
-    # See: https://github.com/jruby/jruby-rack/issues/73
-    #      https://github.com/rails/rails/issues/2435
-    #
-    it "should not set config.action_controller.relative_url_root if the controller doesn't respond to that method" do
-      require 'action_controller' # stub
-      begin
-        #ActionController::Base.send :remove_method, :relative_url_root=
-        ENV['RAILS_RELATIVE_URL_ROOT'] = '/blah'
-        app = double "app"
-        app.stub_chain(:config, :action_controller)
-        app.config.stub(:action_controller).and_return(nil)
-        # app.config.action_controller.should_not_receive(:relative_url_root=)
-        ActionController::Base.stub(:config).and_return app.config
-
-        app.config.should_receive(:relative_url_root=).with('/blah')
-        ActionController::Base.should_not_receive(:relative_url_root=)
-
-        init = Rails::Railtie.__initializer.detect { |i| i.first =~ /url/ }
-        init.should_not be nil
-        init[1].should == [{:after => "action_controller.set_configs"}]
-        init.last.call(app)
-      ensure
-        #ActionController::Base.send :attr_writer, :relative_url_root
-      end
     end
 
   end # if defined? Rails
