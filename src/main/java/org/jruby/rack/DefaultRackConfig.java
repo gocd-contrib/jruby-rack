@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.jruby.rack.logging.OutputStreamLogger;
 import org.jruby.rack.logging.StandardOutLogger;
 import org.jruby.util.SafePropertyAccessor;
@@ -166,12 +167,6 @@ public class DefaultRackConfig implements RackConfig {
                 throw new RackException("could not create logger: '" + loggerClass + "'", e.getTargetException());
             }
         }
-        //catch (ClassNotFoundException e) {
-        //    if ( ! isQuiet() ) {
-        //        err.println("failed creating logger: '" + loggerClass + "'");
-        //        e.printStackTrace(err);
-        //    }
-        //}
         catch (Exception e) {
             if ( ! isQuiet() ) {
                 err.println("failed creating logger: '" + loggerClass + "'");
@@ -265,7 +260,7 @@ public class DefaultRackConfig implements RackConfig {
         // RUBYOPT ignored if jruby.runtime.env.rubyopt = false
         Boolean rubyopt = config.getBooleanProperty("jruby.runtime.env.rubyopt");
         if ( rubyopt == null ) return ! config.isIgnoreEnvironment();
-        return rubyopt != null && !rubyopt;
+        return !rubyopt;
     }
 
     @Override
@@ -283,10 +278,7 @@ public class DefaultRackConfig implements RackConfig {
             return false; // jruby.rack.error = true
         }
         error = config.getBooleanProperty(RackEnvironment.EXCEPTION);
-        if ( error != null && error) {
-            return false; // jruby.rack.exception = true
-        }
-        return true;
+        return error == null || !error; // jruby.rack.exception != true
     }
 
     @Override
@@ -391,7 +383,7 @@ public class DefaultRackConfig implements RackConfig {
                 for ( final String entry : entries ) {
                     String[] pair = entry.split("=", 2);
                     if ( pair.length == 1 ) { // no = separator
-                        if ( entry.trim().length() == 0 ) continue;
+                        if ( entry.trim().isEmpty() ) continue;
                         if ( lastKey == null ) continue; // missing key
                         map.put( lastKey, lastVal = lastVal + ',' + entry );
                     }
@@ -414,6 +406,7 @@ public class DefaultRackConfig implements RackConfig {
         final Map<String,String> loggerTypes = new HashMap<>(8);
         loggerTypes.put("commons_logging", "org.jruby.rack.logging.CommonsLoggingLogger");
         loggerTypes.put("clogging", "org.jruby.rack.logging.CommonsLoggingLogger");
+        loggerTypes.put("log4j", "org.jruby.rack.logging.Log4jLogger");
         loggerTypes.put("slf4j", "org.jruby.rack.logging.Slf4jLogger");
         loggerTypes.put("jul", "org.jruby.rack.logging.JulLogger");
         return loggerTypes;

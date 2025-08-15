@@ -7,22 +7,6 @@
  */
 package org.jruby.rack.servlet;
 
-import org.jruby.rack.RackApplicationFactory;
-import org.jruby.rack.RackConfig;
-import org.jruby.rack.RackLogger;
-
-import javax.servlet.Filter;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-// 3.0
-import javax.servlet.FilterRegistration;
-import javax.servlet.ServletRegistration;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
-
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -30,12 +14,26 @@ import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.Map;
 import java.util.Set;
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
+import javax.servlet.descriptor.JspConfigDescriptor;
+
+import org.jruby.rack.RackApplicationFactory;
+import org.jruby.rack.RackConfig;
+import org.jruby.rack.RackLogger;
 
 /**
  *
  * @author nicksieger
  */
-public class DefaultServletRackContext implements ServletRackContext {
+public class DefaultServletRackContext implements ServletRackContext, RackLogger.DelegatingLogger {
 
     private final RackConfig config;
     private final ServletContext context;
@@ -230,6 +228,11 @@ public class DefaultServletRackContext implements ServletRackContext {
     @Override
     public void log(Level level, CharSequence message, Throwable e) {
         logger.log(level, message, e);
+    }
+
+    @Override
+    public RackLogger unwrapLogger() {
+        return logger;
     }
 
     @Override

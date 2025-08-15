@@ -10,7 +10,7 @@ package org.jruby.rack;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.jruby.rack.RackLogger.Level.*;
+import static org.jruby.rack.RackLogger.Level.INFO;
 
 /**
  * Shared application factory that only creates a single application instance.
@@ -23,7 +23,7 @@ import static org.jruby.rack.RackLogger.Level.*;
  */
 public class SharedRackApplicationFactory extends RackApplicationFactoryDecorator {
 
-    private RackApplication application;
+    private volatile RackApplication application;
 
     public SharedRackApplicationFactory(RackApplicationFactory delegate) {
         super(delegate);
