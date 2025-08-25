@@ -1,7 +1,7 @@
 # JRuby-Rack
 
-[![Gem Version](https://badge.fury.io/rb/jruby-rack.png)][8]
-[![Build Status](https://github.com/jruby/jruby-rack/actions/workflows/maven.yml/badge.svg)][9]
+[![Gem Version](https://badge.fury.io/rb/jruby-rack.png)][5]
+[![Build Status](https://github.com/jruby/jruby-rack/actions/workflows/maven.yml/badge.svg)][6]
 
 JRuby-Rack is a lightweight adapter for the Java Servlet environment that allows
 any (Ruby) Rack-based application to run unmodified in a Java Servlet container.
@@ -28,12 +28,13 @@ dependencies {
 
 ## Compatibility
 
-| JRuby-Rack Version                                           | Status     | Rack      | JRuby      | Java    | Target Servlet API | Target Java EE | Notes                                      |
-|--------------------------------------------------------------|------------|-----------|------------|---------|--------------------|----------------|--------------------------------------------|
-| 2.0.x (_planned_)                                            | Dev        | 2.2       | 9.4 → 10.0 | Java 8+ | 5.0+               | Jakarta EE 9   | Pre 5.0 servlet APIs non functional.       |
-| 1.3.x (master, _unreleased_)                                 | Dev        | 2.2       | 9.4 → 10.0 | Java 8+ | 4.0                | Java EE 8      | Servlet 2.5 → 3.1 likely to work fine.     |
-| [1.2.x](https://github.com/jruby/jruby-rack/tree/1.2-stable) | Maintained | 2.2       | 9.3 → 9.4  | Java 8+ | 3.0                | Java EE 6      | Servlet 3.1 → 4.0 OK with some containers. |
-| [1.1.x](https://github.com/jruby/jruby-rack/tree/1.1-stable) | EOL        | 1.x → 2.2 | 1.6 → 9.4  | Java 8+ | 2.5                | Java EE 5      | Servlet 3.0 → 4.0 OK with some containers. |
+| JRuby-Rack Series                                          | Status     | Rack      | JRuby      | Java | Rails     | Target Servlet API  | Notes                                      |
+|------------------------------------------------------------|------------|-----------|------------|------|-----------|---------------------|--------------------------------------------|
+| 2.0 (_planned_)                                            | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 5.0 → 8.0 | 5.0+ (Jakarta EE 9) | Pre 5.0 servlet APIs non functional.       |
+| 1.3 (master, _unreleased_)                                 | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 5.0 → 8.0 | 4.0 (Java EE 8)     | Servlet 2.5 → 3.1 likely to work fine.     |
+| [1.2](https://github.com/jruby/jruby-rack/tree/1.2-stable) | Maintained | 2.2       | 9.3 → 9.4  | 8+   | 5.0 → 7.2 | 3.0 (Java EE 6)     | Servlet 3.1 → 4.0 OK with some containers. |
+| [1.1](https://github.com/jruby/jruby-rack/tree/1.1-stable) | EOL        | 1.x → 2.2 | 1.6 → 9.4  | 6+   | 2.1 → 5.2 | 2.5 (Java EE 5)     | Servlet 3.0 → 4.0 OK with some containers. |
+| 1.0                                                        | EOL        | 0.9 → 1.x | 1.1 → 1.9  | 5+   | 2.1 → 3.x | 2.5 (Java EE 5)     |                                            |
 
 ## Getting Started
 
@@ -51,9 +52,6 @@ If you're assembling your own WAR using other means, you can install the
 Otherwise you'll need to download the latest [jar release][2], drop it into the
 *WEB-INF/lib* directory and configure the `RackFilter` in your application's
 *web.xml* (see following examples).
-
-Alternatively you can use a server built upon JRuby-Rack such as [Trinidad][3]
-with sensible defaults, without the need to configure a deployment descriptor.
 
 ### Rails
 
@@ -161,9 +159,14 @@ using is `org.jruby.rack.RackFilter`, the filter supports the following
   gets reset (accepts  values "true", "false" and "buffer" to reset the buffer
   only), by default "true"
 - **addsHtmlToPathInfo** controls whether the .html suffix is added to the URI
-  when checking if the request is for a static page
+  when checking if the request is for a static page. The default behavior for 
+  Rails and many other Ruby applications is to add an *.html* extension to the 
+  resource and attempt to handle it before serving a dynamic request on the 
+  original URI.  However, this behavior may confuse other servlets in your 
+  application that have a wildcard mapping. Defaults to true.
 - **verifiesHtmlResource** used with the previous parameter to make sure the
-  requested static resource exists before adding the .html request URI suffix
+  requested static resource exists before adding the .html request URI suffix.
+  Defaults to false.
 
 The application can also be configured to dispatch through a servlet instead of
 a filter, the servlet class name is `org.jruby.rack.RackServlet`.
@@ -192,11 +195,11 @@ Several aspects of Rails are automatically set up for you.
 ## JRuby Runtime Management
 
 JRuby runtime management and pooling is done automatically by the framework.
-In the case of Rails, runtimes are pooled by default (the default will most
-likely change with the adoption of Rails 4.0). For other Rack applications a
-single shared runtime is created and shared for every request by default.
-As of **1.1.9** if *jruby.min.runtimes* and *jruby.max.runtimes* values are
-specified pooling is supported for plain Rack applications as well.
+For Rack-only applications (and Rails ones from jruby-rack >= 1.3), a single 
+shared runtime is created and shared for every request by default.
+
+If *jruby.min.runtimes* and *jruby.max.runtimes* values are
+specified pooling of runtimes can be enabled for both types of applications.
 
 We do recommend to boot your runtimes up-front to avoid the cost of initializing
 one while a request kicks in and find the pool empty, this can be easily avoided
@@ -241,10 +244,9 @@ as context init parameters in web.xml or as VM-wide system properties.
 - `jruby.runtime.env`: Allows to set a custom ENV hash for your Ruby environment
   and thus insulate the application from the environment it is running. By setting
   this option to en empty string (or 'false') it acts as if the ENV hash was
-  cleared out (similar to the now deprecated `jruby.rack.ignore.env` option).
-- `jruby.runtime.env.rubyopt`: This option is used for compatibility with the
-  (deprecated) `jruby.rack.ignore.env` option since it cleared out the ENV after
-  RUBYOPT has been processed, by setting it to true ENV['RUBYOPT'] will be kept.
+  cleared out (similar to the now removed `jruby.rack.ignore.env` option).
+- `jruby.runtime.env.rubyopt`: Set to true to cause ENV['RUBYOPT']
+  to be retained even when using `jruby.runtime.env` to override environemnt (similar to how the removed `jruby.rack.ignore.env` option behaved by default).
 - `jruby.rack.logging`: Specify the logging device to use. Defaults to
   `servlet_context`. See below.
 - `jruby.rack.request.size.initial.bytes`: Initial size for request body memory
@@ -263,20 +265,6 @@ as context init parameters in web.xml or as VM-wide system properties.
   been previously read this leads to a limitation (Rack won't see the POST paras).
   Thus an alternate pure 'servlet' env "conversion" is provided that maps servlet
   parameters (and cookies) directly to Rack params, avoiding Rack's input parsing.
-- `jruby.rack.filter.adds.html`:
-  **deprecated** use `addsHtmlToPathInfo` filter config init parameter.
-  The default behavior for Rails and many other Ruby applications is to add an
-  *.html* extension to the resource and attempt to handle it before serving a
-  dynamic request on the original URI.
-  However, this behavior may confuse other servlets in your application that
-  have a wildcard mapping. Defaults to true.
-- `jruby.rack.filter.verify.resource.exists`:
-  **deprecated** use `verifiesHtmlResource` filter config init parameter.
-  If `jruby.rack.filter.adds.html` is true, then this setting, when true, adds
-  an additional check using `ServletContext#getResource` to verify that the
-  *.html* resource exists. Default is false.
-  (Note that apparently some servers may not implement `getResource` in the way
-  that is expected here, so in that case this setting won't matter.)
 
 ## Initialization
 
@@ -331,17 +319,16 @@ For those loggers that require a specific named logger, set it with the
 Checkout the JRuby-Rack code using [git](http://git-scm.com/) :
 
 ```shell
-git clone git://github.com/jruby/jruby-rack.git
+git clone git@github.com:jruby/jruby-rack.git
 cd jruby-rack
 ```
 
-Ensure you have [Maven](http://maven.apache.org/) installed.
-It is required for downloading jar artifacts that JRuby-Rack depends on.
+Ensure you have a compatible JVM installed. It is required for building and compiling.
 
 Build the .jar using Maven :
 
 ```shell
-mvn install
+./mvnw install
 ```
 
 the generated jar should be located at **target/jruby-rack-*.jar**
@@ -359,21 +346,20 @@ package and push the .jar every time a commit changes a source file).
 
 ## Releasing
 
-* Make sure auth is configured for "central" repository ID in your .m2/settings.xml
-* Update the version in src/main/ruby/jruby/rack/version.rb to the release version
-* mvn release:prepare
-* mvn release:perform (possibly with -DuseReleaseProfile=false due to Javadoc doclint failures for now)
-* rake clean gem SKIP_SPECS=true and push the gem
+* Make sure auth is configured for "central" repository ID in your `.m2/settings.xml`
+* Update the version in `src/main/ruby/jruby/rack/version.rb` to the release version
+* `./mvnw release:prepare`
+* `./mvnw release:perform` (possibly with `-DuseReleaseProfile=false` due to Javadoc doclint failures for now)
+* `rake clean gem SKIP_SPECS=true` and push the gem
 
 ## Support
 
-Please use [github][4] to file bugs, patches and/or pull requests.
-More information at the [wiki][5] or ask us at **#jruby**'s IRC channel.
+Please use [github][3] to file bugs, patches and/or pull requests.
+More information at the [wiki][4] or ask us at **#jruby**'s IRC channel.
 
 [1]: https://github.com/jruby/warbler#warbler--
-[2]: https://oss.sonatype.org/content/repositories/releases/org/jruby/rack/jruby-rack/
-[3]: https://github.com/trinidad/trinidad
-[4]: https://github.com/jruby/jruby-rack/issues
-[5]: https://wiki.github.com/jruby/jruby-rack
-[8]: http://badge.fury.io/rb/jruby-rack
-[9]: https://github.com/jruby/jruby-rack/actions/workflows/maven.yml
+[2]: https://central.sonatype.com/artifact/org.jruby.rack/jruby-rack
+[3]: https://github.com/jruby/jruby-rack/issues
+[4]: https://github.com/jruby/jruby-rack/wiki
+[5]: http://badge.fury.io/rb/jruby-rack
+[6]: https://github.com/jruby/jruby-rack/actions/workflows/maven.yml

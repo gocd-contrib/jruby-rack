@@ -51,22 +51,12 @@ end
 desc "Unpack the rack gem"
 task :unpack_gem => "target" do |t|
   target = File.expand_path(t.prerequisites.first)
-  spec = Gem.loaded_specs['rack']
-  # JRuby <= 1.7.20 does not handle respond_to? with method_missing right
-  # ... issue with Bundler::StubSpecification wrapping (in bundler 1.10.x)
-  unless ( gem_file = spec.cache_file rescue nil )
-    #if defined?(::Bundler) && ::Bundler.const_defined?(:StubSpecification) # since Bundler 1.10.1
-    #  spec = spec.to_spec if spec.is_a?(::Bundler::StubSpecification)
-    #else
-    #  spec = spec.to_spec if spec.respond_to?(:to_spec)
-    #end
-    gem_file = File.join(spec.base_dir, 'cache', spec.file_name)
-  end
-  unless uptodate?("#{target}/vendor/rack.rb", [__FILE__, gem_file])
+  rack_gemfile = Gem.loaded_specs['rack'].cache_file
+  unless uptodate?("#{target}/vendor/rack.rb", [__FILE__, rack_gemfile])
     mkdir_p "target/vendor"
     require 'rubygems/installer'
-    rack_dir = File.basename(gem_file).sub(/\.gem$/, '')
-    Gem::Package.new(gem_file).extract_files("#{target}/#{rack_dir}")
+    rack_dir = File.basename(rack_gemfile).sub(/\.gem$/, '')
+    Gem::Package.new(rack_gemfile).extract_files("#{target}/#{rack_dir}")
     File.open("#{target}/vendor/rack.rb", "w") do |f|
       f << "dir = File.dirname(__FILE__)\n"
       f << "if dir =~ /.jar!/ && dir !~ /^file:/\n"
@@ -177,7 +167,7 @@ task :gem => [target_jar, target_jruby_rack, target_jruby_rack_version] do
     gemspec = Gem::Specification.new do |gem|
       gem.name = %q{jruby-rack}
       gem.version = GEM_VERSION
-      gem.authors = ['Nick Sieger']
+      gem.authors = ['Nick Sieger', 'Karol Bucek', 'JRuby contributors']
       gem.date = Date.today.to_s
       gem.license = 'MIT'
       gem.description = %{JRuby-Rack is a combined Java and Ruby library that adapts the Java Servlet API to Rack. For JRuby only.}
@@ -185,11 +175,11 @@ task :gem => [target_jar, target_jruby_rack, target_jruby_rack_version] do
       gem.email = ['nick@nicksieger.com']
       gem.files = FileList["./**/*"].exclude("*.gem").map{ |f| f.sub(/^\.\//, '') }
       gem.homepage = %q{http://jruby.org}
-      gem.has_rdoc = false
+      gem.required_ruby_version = '>= 3.1.0' # JRuby >= 9.4
     end
-    defined?(Gem::Builder) ? Gem::Builder.new(gemspec).build : begin
-      require 'rubygems/package'; Gem::Package.build(gemspec)
-    end
+
+    require 'rubygems/package'
+    Gem::Package.build(gemspec)
     File.open('jruby-rack.gemspec', 'w') { |f| f << gemspec.to_ruby }
     mv FileList['*.gem'], '..'
   end

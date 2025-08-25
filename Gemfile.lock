@@ -20,7 +20,7 @@ GEM
     rspec-mocks (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.4)
+    rspec-support (3.13.5)
     thor (1.4.0)
 
 PLATFORMS
@@ -32,6 +32,6 @@ PLATFORMS
 
 DEPENDENCIES
   appraisal
-  rack (~> 2.2)
+  rack (~> 2.2.0)
   rake (~> 13.3)
   rspec
