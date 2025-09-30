@@ -30,8 +30,8 @@ dependencies {
 
 | JRuby-Rack Series                                          | Status     | Rack      | JRuby      | Java | Rails     | Target Servlet API  | Notes                                      |
 |------------------------------------------------------------|------------|-----------|------------|------|-----------|---------------------|--------------------------------------------|
-| 2.0 (_planned_)                                            | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 5.0 → 8.0 | 5.0+ (Jakarta EE 9) | Pre 5.0 servlet APIs non functional.       |
-| 1.3 (master, _unreleased_)                                 | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 5.0 → 8.0 | 4.0 (Java EE 8)     | Servlet 2.5 → 3.1 likely to work fine.     |
+| 2.0 (_planned_)                                            | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 6.1 → 8.0 | 5.0+ (Jakarta EE 9) | Pre 5.0 servlet APIs non functional.       |
+| 1.3 (master, _unreleased_)                                 | Dev        | 2.2       | 9.4 → 10.0 | 8+   | 6.1 → 8.0 | 4.0 (Java EE 8)     | Servlet 2.5 → 3.1 likely to work fine.     |
 | [1.2](https://github.com/jruby/jruby-rack/tree/1.2-stable) | Maintained | 2.2       | 9.3 → 9.4  | 8+   | 5.0 → 7.2 | 3.0 (Java EE 6)     | Servlet 3.1 → 4.0 OK with some containers. |
 | [1.1](https://github.com/jruby/jruby-rack/tree/1.1-stable) | EOL        | 1.x → 2.2 | 1.6 → 9.4  | 6+   | 2.1 → 5.2 | 2.5 (Java EE 5)     | Servlet 3.0 → 4.0 OK with some containers. |
 | 1.0                                                        | EOL        | 0.9 → 1.x | 1.1 → 1.9  | 5+   | 2.1 → 3.x | 2.5 (Java EE 5)     |                                            |
@@ -46,16 +46,18 @@ in your WAR file when it gets built.
 If you're assembling your own WAR using other means, you can install the
 **jruby-rack** gem. It provides a method to locate the jar file:
 
-    require 'jruby-rack'
-    FileUtils.cp JRubyJars.jruby_rack_jar_path, '.'
+```ruby
+require 'jruby-rack'
+FileUtils.cp JRubyJars.jruby_rack_jar_path, '.'
+```
 
 Otherwise you'll need to download the latest [jar release][2], drop it into the
-*WEB-INF/lib* directory and configure the `RackFilter` in your application's
-*web.xml* (see following examples).
+`WEB-INF/lib` directory and configure the `RackFilter` in your application's
+`web.xml` (see following examples).
 
 ### Rails
 
-Here's sample *web.xml* configuration for Rails. Note the environment and
+Here's sample `web.xml` configuration for Rails. Note the environment and
 min/max runtime parameters. For **multi-threaded** (a.k.a. `threadsafe!`)
 Rails with a single runtime, set min/max both to 1. Otherwise, define the size
 of the runtime pool as you wish.
@@ -104,8 +106,8 @@ of the runtime pool as you wish.
 ### (Other) Rack Applications
 
 The main difference when using a non-Rails Rack application is that JRuby-Rack
-looks for a "rackup" file named **config.ru** in  `WEB-INF/config.ru` or
-`WEB-INF/*/config.ru`. Here's a sample *web.xml* configuration :
+looks for a "rackup" file named `config.ru` in  `WEB-INF/config.ru` or
+`WEB-INF/*/config.ru`. Here's a sample `web.xml` configuration :
 
 ```xml
 <filter>
@@ -123,8 +125,8 @@ looks for a "rackup" file named **config.ru** in  `WEB-INF/config.ru` or
 </listener>
 ```
 
-If you don't have a *config.ru* or don't want to include it in your web app, you
-can embed it directly in the *web.xml* as follows (using Sinatra as an example):
+If you don't have a `config.ru` or don't want to include it in your web app, you
+can embed it directly in the `web.xml` as follows (using Sinatra as an example):
 
 ```xml
 <context-param>
@@ -160,7 +162,7 @@ using is `org.jruby.rack.RackFilter`, the filter supports the following
   only), by default "true"
 - **addsHtmlToPathInfo** controls whether the .html suffix is added to the URI
   when checking if the request is for a static page. The default behavior for 
-  Rails and many other Ruby applications is to add an *.html* extension to the 
+  Rails and many other Ruby applications is to add an `.html` extension to the 
   resource and attempt to handle it before serving a dynamic request on the 
   original URI.  However, this behavior may confuse other servlets in your 
   application that have a wildcard mapping. Defaults to true.
@@ -174,9 +176,9 @@ a filter, the servlet class name is `org.jruby.rack.RackServlet`.
 ## Servlet Environment Integration
 
 - servlet context is accessible to any application through the Rack environment
-  variable *java.servlet_context* (as well as the `$servlet_context` global).
+  variable `java.servlet_context` (as well as the `$servlet_context` global).
 - the (native) servlet request and response objects could be obtained via the
-  *java.servlet_request* and *java.servlet_response* keys
+  `java.servlet_request` and `java.servlet_response` keys
 - all servlet request attributes are passed through to the Rack environment (and
   thus might override request headers or Rack environment variables)
 - servlet sessions can be used as a (java) session store for Rails, session
@@ -198,13 +200,13 @@ JRuby runtime management and pooling is done automatically by the framework.
 For Rack-only applications (and Rails ones from jruby-rack >= 1.3), a single 
 shared runtime is created and shared for every request by default.
 
-If *jruby.min.runtimes* and *jruby.max.runtimes* values are
+If `jruby.min.runtimes` and `jruby.max.runtimes` values are
 specified pooling of runtimes can be enabled for both types of applications.
 
 We do recommend to boot your runtimes up-front to avoid the cost of initializing
 one while a request kicks in and find the pool empty, this can be easily avoided
-by setting *jruby.min.runtimes* equal to *jruby.max.runtimes*. You might also
-want to consider tuning the *jruby.runtime.acquire.timeout* parameter to not
+by setting `jruby.min.runtimes` equal to `jruby.max.runtimes`. You might also
+want to consider tuning the `jruby.runtime.acquire.timeout` parameter to not
 wait too long when all (max) runtimes from the pool are busy.
 
 ## JRuby-Rack Configuration
@@ -214,18 +216,18 @@ as context init parameters in web.xml or as VM-wide system properties.
 
 - `rackup`: Rackup script for configuring how the Rack application is mounted.
   Required for Rack-based applications other than Rails. Can be omitted if a
-  *config.ru* is included in the application root.
+  `config.ru` is included in the application root.
 - `public.root`: Relative path to the location of your application's static
-  assets. Defaults to */*.
+  assets. Defaults to `*/*`.
 - `rails.root`: Root path to the location of the Rails application files.
-  Defaults to */WEB-INF*.
+  Defaults to `*/WEB-INF*`.
 - `rails.env`: Specify the Rails environment to run. Defaults to 'production'.
 - `rails.relative_url_append`: Specify a path to be appended to the
   `ActionController::Base.relative_url_root` after the context path. Useful
   for running a rails app from the same war as an existing app, under a
   sub-path of the main servlet context root.
 - `gem.path`: Relative path to the bundled gem repository. Defaults to
-  */WEB-INF/gems*.
+  `/WEB-INF/gems`.
 - `jruby.min.runtimes`: For non-threadsafe Rails applications using a runtime
   pool, specify an integer minimum number of runtimes to hold in the pool.
 - `jruby.max.runtimes`: For non-threadsafe Rails applications, an integer
@@ -270,17 +272,17 @@ as context init parameters in web.xml or as VM-wide system properties.
 
 There are often cases where you need to perform custom initialization of the
 Ruby environment before booting the application. You can create a file called
-*META-INF/init.rb* or *WEB-INF/init.rb* inside the war file for this purpose.
+`META-INF/init.rb` or `WEB-INF/init.rb` inside the war file for this purpose.
 These files, if found, will be evaluated before booting the Rack environment,
 allowing you to set environment variables, load scripts, etc.
 
 For plain Rack applications, JRuby-Rack also supports a magic comment to solve
 the "rackup" chicken-egg problem (you need Rack's builder loaded before loading
-the *config.ru*, yet you may want to setup the gem version from within the rackup
+the `config.ru`, yet you may want to setup the gem version from within the rackup
  file). As we ship with the Rack gem bundled, otherwise when executing the
-provided *config.ru* the bundled (latest) version of Rack will get loaded.
+provided `config.ru` the bundled (latest) version of Rack will get loaded.
 
-Use **rack.version** to specify the Rack gem version to be loaded before rackup :
+Use `rack.version` to specify the Rack gem version to be loaded before rackup :
 
 ```ruby
 # encoding: UTF-8
@@ -331,7 +333,7 @@ Build the .jar using Maven :
 ./mvnw install
 ```
 
-the generated jar should be located at **target/jruby-rack-*.jar**
+the generated jar should be located at `target/jruby-rack-*.jar`
 
 Alternatively use Rake, e.g. to build the gem (skipping specs) :
 
@@ -351,6 +353,20 @@ package and push the .jar every time a commit changes a source file).
 * `./mvnw release:prepare`
 * `./mvnw release:perform` (possibly with `-DuseReleaseProfile=false` due to Javadoc doclint failures for now)
 * `rake clean gem SKIP_SPECS=true` and push the gem
+
+## Adding testing for new Rails versions
+
+* Add the new version to `.github/workflows/maven.yml` under the `matrix` section
+* Add a new configuration to the `Appraisals` file, then
+    ```bundle exec appraisal generate```
+* Generate a new stub Rails application for the new version
+    ```shell
+    VERSION=rails72
+    cd src/spec/stub
+    rm -rf $VERSION && BUNDLE_GEMFILE=~/Projects/community/jruby-rack/gemfiles/${VERSION}_rack22.gemfile bundle exec rails new $VERSION --minimal --skip-git --skip-docker --skip-active-model --skip-active-record --skip-test --skip-system-test --skip-dev-gems --skip-bundle --skip-keeps --skip-asset-pipeline --skip-ci --skip-brakeman --skip-rubocop
+    ```
+* Manual changes to make to support testing
+  * In `config/production.rb` comment out the default `config.logger` value so jruby-rack applies its own `RailsLogger`.  
 
 ## Support
 

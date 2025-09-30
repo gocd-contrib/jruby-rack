@@ -9,7 +9,7 @@ on:
 env:
   # Default versions for canonical release build
   DEFAULT_JAVA_VERSION: '8'
-  DEFAULT_JRUBY_VERSION: '9.4.13.0' # Should match pom.xml <jruby.version> property (AND a version inside the test matrix)
+  DEFAULT_JRUBY_VERSION: '9.4.14.0' # Should match pom.xml <jruby.version> property (AND a version inside the test matrix)
   DEFAULT_RACK_VERSION: '~> 2.2.0' # Should match Gemfile (AND a version inside the test matrix)
 
 jobs:
@@ -19,8 +19,8 @@ jobs:
 
     strategy:
       matrix:
-        jruby_version: [ '9.4.13.0', '10.0.2.0' ]
-        java_version: [ '8', '11', '17', '21' ]
+        jruby_version: [ '9.4.14.0', '10.0.2.0' ]
+        java_version: [ '8', '11', '17', '21', '25' ]
         rack_version: [ '~> 2.2.0' ]
         exclude:
           - jruby_version: '10.0.2.0'
@@ -32,10 +32,10 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
     - name: Set up JDK
-      uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+      uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
       with:
         java-version: ${{ matrix.java_version }}
         distribution: 'temurin'
@@ -59,17 +59,14 @@ jobs:
     strategy:
       matrix:
         appraisal: [
-          'rails50_rack22',
-          'rails52_rack22',
-          'rails60_rack22',
           'rails61_rack22',
           'rails70_rack22',
           'rails71_rack22',
           'rails72_rack22',
           'rails80_rack22',
         ]
-        jruby_version: [ '9.4.13.0', '10.0.2.0' ]
-        java_version: [ '8', '11', '17', '21' ]
+        jruby_version: [ '9.4.14.0', '10.0.2.0' ]
+        java_version: [ '8', '11', '17', '21', '25' ]
         exclude:
           - jruby_version: '10.0.2.0'
             java_version: '8'  # JRuby 10 requires Java 21
@@ -78,7 +75,7 @@ jobs:
           - jruby_version: '10.0.2.0'
             java_version: '17' # JRuby 10 requires Java 21
           - appraisal: 'rails80_rack22'
-            jruby_version: '9.4.13.0' # Rails 8 requires Ruby 3.4 compatibility, which JRuby 9.4 does not support
+            jruby_version: '9.4.14.0' # Rails 8 requires Ruby 3.4 compatibility, which JRuby 9.4 does not support
       fail-fast: false
 
     env:
@@ -86,17 +83,17 @@ jobs:
       JRUBY_VERSION: ${{ matrix.jruby_version }}
 
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Set up JDK
-        uses: actions/setup-java@c5195efecf7bdfc987ee8bae7a71cb8b11521c00 # v4.7.1
+        uses: actions/setup-java@dded0888837ed1f317902acf8a20df0ad188d165 # v5.0.0
         with:
           java-version: ${{ matrix.java_version }}
           distribution: 'temurin'
           cache: maven
 
       - name: Setup JRuby
-        uses: ruby/setup-ruby@829114fc20da43a41d27359103ec7a63020954d4 # v1.255.0
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: jruby-${{ matrix.jruby_version }}
           bundler-cache: 'false' # Need to install later so we can vary from Gemfile.lock as required for JRuby version compatibility
