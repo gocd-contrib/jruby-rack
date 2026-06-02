@@ -32,9 +32,9 @@ dependencies {
 
 | JRuby-Rack Series                                              | Status        | Rack      | JRuby      | Java | Rails     | Target Servlet API  | Notes                                                          |
 |----------------------------------------------------------------|---------------|-----------|------------|------|-----------|---------------------|----------------------------------------------------------------|
-| **2.0 (_planned_, _unreleased_)**                              | Dev           | 2.2       | 9.4 → 10.0 | 8+   | 7.0 → 8.0 | 5.0+ (Jakarta EE 9) | ❌ Servlet < 5.0 containers will not work                       |
-| **1.3 (master, _unreleased_)**                                 | Dev           | 2.2       | 9.4 → 10.0 | 8+   | 7.0 → 8.0 | 4.0 (Java EE 8)     | ✅ _Unofficial_: Servlet 2.5 → 3.1 & Rails 6.1 likely working   |
-| [**1.2**](https://github.com/jruby/jruby-rack/tree/1.2-stable) | Maintained    | 2.2       | 9.3 → 10.0 | 8+   | 5.0 → 8.0 | 3.0 (Java EE 6)     | ✅ _Unofficial_: Servlet 3.1 → 4.0 also OK with most containers |
+| **2.0 (_planned_, _unreleased_)**                              | Dev           | 2.2       | 9.4 → 10.1 | 8+   | 7.0 → 8.0 | 5.0+ (Jakarta EE 9) | ❌ Servlet < 5.0 containers will not work                       |
+| **1.3 (master, _unreleased_)**                                 | Dev           | 2.2       | 9.4 → 10.1 | 8+   | 7.0 → 8.0 | 4.0 (Java EE 8)     | ✅ _Unofficial_: Servlet 2.5 → 3.1 & Rails 6.1 likely working   |
+| [**1.2**](https://github.com/jruby/jruby-rack/tree/1.2-stable) | Maintained    | 2.2       | 9.3 → 10.1 | 8+   | 5.0 → 8.0 | 3.0 (Java EE 6)     | ✅ _Unofficial_: Servlet 3.1 → 4.0 also OK with most containers |
 | [**1.1**](https://github.com/jruby/jruby-rack/tree/1.1-stable) | EOL @ 2024-05 | 1.x → 2.2 | 1.6 → 9.4  | 6+   | 2.1 → 5.2 | 2.5 (Java EE 5)     | ✅ _Unofficial_: Servlet 3.0 → 4.0 also OK with most containers |
 | [**1.0**](https://github.com/jruby/jruby-rack/tree/1.0.10)     | EOL @ 2011-11 | 0.9 → 1.x | 1.1 → 1.9  | 5+   | 2.1 → 3.x | 2.5 (Java EE 5)     |                                                                |
 
@@ -359,11 +359,17 @@ package and push the .jar every time a commit changes a source file).
 
 ## Releasing
 
+Releasing must be done by users authorized to push to the `org.jruby` group ID on https://central.sonatype.org and to push the `jruby-rack` gem to https://rubygems.org.
+
 * Make sure auth is configured for "central" repository ID in your `.m2/settings.xml`
-* Update the version in `src/main/ruby/jruby/rack/version.rb` to the release version
-* `./mvnw release:prepare`
-* `./mvnw release:perform` (possibly with `-DuseReleaseProfile=false` due to Javadoc doclint failures for now)
+* Update the versions in `pom.xml` and `src/main/ruby/jruby/rack/version.rb` to the release version
+* Commit the version update locally
+* Run `./mvnw deploy -Prelease` to build, sign, and push all artifacts to Maven Central staging
+* Confirm the release completes publishing at `https://central.sonatype.org`
 * `rake clean gem SKIP_SPECS=true` and push the gem
+* Tag the release version in git
+* Update the versions again to the next dev version (`-SNAPSHOT` for the Maven artifact in `pom.xml` and `.SNAPSHOT` for the gem in `version.rb`)
+* Push all commits and tags to GitHub
 
 ## Adding testing for new Rails versions
 
