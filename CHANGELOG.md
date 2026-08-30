@@ -1,10 +1,13 @@
 ## 1.3.0 (UNRELEASED) 
 
 - Officially support Javax Servlet API 4.0 (JEE 8)
+- Refactor logging for more sane defaults
+- Remove long-deprecated configuration and API functionality
+
+For most users this should be a minor upgrade; as long as not depending on deprecated functionality or JRuby 9.x.
 
 Breaking compatibility changes
-- Drop support for Java < 21
-- Drop support for JRuby < 9.4
+- Drop support for JRuby 9.x (and thus Java < 21)
 - Drop support for Rails < 7.2
 
 Breaking behavioral changes
@@ -30,6 +33,13 @@ Breaking configuration capability changes
 - Drop deprecated and undocumented jruby-rack 1.0 backwards compat properties `jruby.runtime.timeout.sec`, `jruby.runtime.initializer.threads`, `jruby.init.serial`, `jruby.rack.request.size.threshold.bytes`
 - Drop deprecated `jruby.rack.ignore.env` property, replaced long ago by `jruby.runtime.env` and optional `jruby.runtime.env.rubyopt`
 - Drop deprecated `jruby.rack.filter.*` properties, replaced long ago by init parameters `addsHtmlToPathInfo` and `verifiesHtmlResource`
+
+## 1.2.8
+
+- Improve isolation and bundler version/CLI boot issues with more opinionated boot process (#461)
+- Fix possible infinite loop in Response#isClientAbortException (#449, #450)
+- Fix startup logging of captured errors when config properties cannot be dumped
+- Update (bundled) rack to 2.2.24
 
 ## 1.2.7
 

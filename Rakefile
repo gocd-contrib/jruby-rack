@@ -157,7 +157,7 @@ file (target_jruby_rack_version = "target/gem/lib/jruby/rack/version.rb") do |fi
 end
 
 desc "Build the jruby-rack-#{GEM_VERSION}.gem"
-task :gem => [target_jar, target_jruby_rack, target_jruby_rack_version] do
+task :gem => [:clean, target_jar, target_jruby_rack, target_jruby_rack_version] do
   Rake::Task['spec'].invoke unless ENV['SKIP_SPECS'] == 'true'
   cp FileList["CHANGELOG.md", "LICENSE.txt", "README.md"], "target/gem"
   cp target_jar, "target/gem/lib"
@@ -178,7 +178,7 @@ task :gem => [target_jar, target_jruby_rack, target_jruby_rack_version] do
       gem.email = ['nick@nicksieger.com']
       gem.files = FileList["./**/*"].exclude("*.gem").map{ |f| f.sub(/^\.\//, '') }
       gem.homepage = %q{http://jruby.org}
-      gem.required_ruby_version = '>= 3.1.0' # JRuby >= 9.4
+      gem.required_ruby_version = '>= 3.4.0' # JRuby >= 10.0
     end
 
     require 'rubygems/package'
